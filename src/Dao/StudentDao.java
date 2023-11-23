@@ -4,6 +4,7 @@ package Dao;
 import java.util.Scanner;
 
 import Dto.StudentDto;
+import file.FileIO;
 
 public class StudentDao {
 	Scanner sc = new Scanner(System.in);
@@ -13,8 +14,12 @@ public class StudentDao {
         
         private int count;
         
+        private FileIO fio;
+        
 		// 추가, 삭제, 검색, 수정 (CRUD)
         public StudentDao() {
+            fio = new FileIO("student");
+            fio.create();
         	count = 0;
         	
         	student = new StudentDto[10];       // 변수만 생성, 객체 생성 안됨.
@@ -145,15 +150,59 @@ public class StudentDao {
             }
 		}
 
+		public void save() {
+			// 실제로 삭제된 데이터를 제외한 (정상적인) 데이터가 몇 개?
+			int ci = 0;
+			for(int i = 0; i < student.length; i++) {
+				if(student[i] != null
+					&& student[i].getName().equals("") == false){
+						ci++;
+					}
+
+				// 배열
+			    String arr[] = new String[ci];
+			    int j = 0;
+			    for(int i = 0; i < student.length; i++) {
+			    	if(student[i] != null
+						&& student[i].getName().equals("") == false){
+							arr[j] = student[i].toString();
+                            j++;			    
+						}
+			    }
+			    fio.dataSave(arr);
+			}
+		
+		
+		public void load() {
+			String arr[] = fio.dataLoad();
+			
+			if(arr == null || arr.length == 0) {
+				count = 0;
+				return;
+			}
+			
+			// (추가될) 다음 데이터의 index
+			count = arr.length;
+			
+			// string[] -> student[]
+			for (int i = 0; i < arr.length; i++) {
+				
+		    // 문자열 자르기
+			String split[] = arr[i].split("-");
+			
+			// 자른 문자열을 dto에 저장하기 위한 처리
+		    String name = split[0];
+		    int age = Integer.parseInt(split[1]);
+		    double height = Double.parseDouble(split[2]);
+		    String address = split[3];
+		    int kor =  Integer.parseInt(split[4]);
+		    int eng =  Integer.parseInt(split[5]);
+		    int math =  Integer.parseInt(split[6]);
+
+		    student[i] = new StudentDto(name, age, height, address, kor, eng, math);
+		    
+		    System.out.println("데이터로드 성공");
+			}
+        }
 }
-
-
-
-
-
-
-
-
-
-
 
